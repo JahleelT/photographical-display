@@ -13,14 +13,24 @@ body {
     left: 50%;
     top: 50%;
     transform: translate(0%, -50%); 
+    transition: transform 1.2s;
+    will-change: transform;
     user-select: none; /* -- Prevent image highlighting -- */
 }
 
 #image-track > .image {
     width: 40vmin;
     height: 56vmin;
+    min-width: 30vmin;
+    aspect-ratio: 2/3;
     object-fit: cover;
     object-position: 100% center;
+    transition: object-position 1.2s ease, transform 0.3s ease;
+    cursor: pointer;
+}
+
+#image-track > .image:hover {
+    transform: scale(1.05);
 }
 
 body.menu-toggled > .meta-link > span {
@@ -61,6 +71,26 @@ body.menu-toggled > .meta-link > span {
 .meta-link:hover {
     background-color: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#scroll-hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2rem;
+    background-color: rgba(0,0,0,0.4);
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    opacity: 1;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+#scroll-hint.hidden {
+    opacity: 0;
 }
 
 
