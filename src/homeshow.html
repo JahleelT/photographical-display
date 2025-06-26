@@ -84,46 +84,6 @@
                 transform: scale(1.05);
             }
 
-            body.menu-toggled > .meta-link > span {
-                color: rgb(30, 30, 30);
-            }
-
-            #source-link {
-                bottom: 60px;
-            }
-
-            #source-link > i {
-                color: rgb(94, 106, 210);
-            }
-
-            #yt-link > i {
-                color: rgb(239, 83, 80);
-            }
-
-            .meta-link {
-                align-items: center;
-                backdrop-filter: blur(3px);
-                background-color: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 6px;
-                bottom: 10px;
-                box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
-                cursor: pointer;  
-                display: inline-flex;
-                gap: 5px;
-                left: 10px;
-                padding: 10px 20px;
-                position: fixed;
-                text-decoration: none;
-                transition: background-color 400ms, border-color 400ms;
-                z-index: 10000;
-            }
-
-            .meta-link:hover {
-                background-color: rgba(255, 255, 255, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }
-
             #scroll-hint {
                 position: fixed;
                 top: 50%;
@@ -131,7 +91,7 @@
                 transform: translate(-50%, -50%);
                 color: white;
                 font-size: 2rem;
-                background-color: rgba(0,0,0,0.4);
+                background-color: rgba(0, 0, 0, 0.4);
                 padding: 1rem 2rem;
                 border-radius: 12px;
                 opacity: 1;
@@ -154,41 +114,140 @@
 
         <div id="image-track" data-mouse-down-at="0" data-prev-percentage="0">
 
-            <div class="image-wrapper" data-location="New York">
+            <div class="image-wrapper">
                 <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829816/nycCover_ea64pc.jpg" draggable="false" /> <!-- New York Cover Photo -->
+                <div class="location-label">New York</div>
             </div>
 
-            <div class="image-wrapper" data-location="Italy">
+            <div class="image-wrapper">
                 <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829813/italyCover_itiqgb.jpg" draggable="false" data-location="Italy"/> <!-- Italy Cover Photo -->
+                <div class="location-label">Italy</div>
             </div>
             
-            <div class="image-wrapper" data-location="Greece">
+            <div class="image-wrapper">
                 <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829807/greeceCover_yphpzs.jpg" draggable="false" data-location="Greece" /> <!-- Greece Cover Photo -->
+                <div class="location-label">Greece</div>
             </div>
             
-            <div class="image-wrapper" data-location="Amsterdam">
+            <div class="image-wrapper">
                 <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829797/amsterdamCover_q3fvju.jpg" draggable="false" data-location="Amsterdam" /> <!-- Amsterdam/Netherlands/Holland Cover Photo-->
+                <div class="location-label">Amsteradm</div>
             </div>
             
-            <div class="image-wrapper" data-location="London">
+            <div class="image-wrapper">
                 <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829813/londonCover_kgkjrm.jpg" draggable="false" data-location="London"/> <!-- London/UK Cover Photo -->
+                <div class="location-label">London</div>
             </div>
             
-            <div class="image-wrapper" data-location="France">
+            <div class="image-wrapper">
                 <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829807/franceCover_wzuy4g.jpg" draggable="false" data-location="France"/> <!-- France/Paris/Versailles Cover Photo -->
+                <div class="location-label">France</div>
             </div>
             
-            <div class="image-wrapper" data-location="Belgium">
+            <div class="image-wrapper">
                 <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829804/belgiumCover_uv89o0.jpg" draggable="false" data-location="Belgium"/> <!-- Belgium/Bruges/Brussels Cover Photo -->
+                <div class="location-label">Belgium</div>
             </div>
             
-            <div class="image-wrapper" data-location="Seattle">
+            <div class="image-wrapper">
                 <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829816/seattleCover_olu4vz.jpg" draggable="false" data-location="Seattle"/> <!-- Seattle/Washington/Vancouver(?) Cover Photo -->
+                <div class="location-label">Seattle</div>
             </div>
             
         </div>
 
-        <script src="animation.js" defer></script>
+        <script>
+            const track = document.getElementById("image-track");
+
+            if (!track.dataset.percentage) track.dataset.percentage = "0";
+
+            // handling events 
+
+            const handleOnDown = e => {
+                track.dataset.mouseDownAt = e.clientX;
+            };
+
+            const handleOnUp = () => {
+                track.dataset.mouseDownAt = "0";  
+                track.dataset.prevPercentage = track.dataset.percentage;
+            }
+
+            const handleOnMove = e => {
+                if(track.dataset.mouseDownAt === "0") return;
+
+                const mouseDelta = parseFloat(track.dataset.mouseDownAt) - e.clientX,
+                    maxDelta = window.innerWidth / 2;
+
+                const imageCount = track.getElementsByClassName("image").length;
+                const maxScrollPercentage = -100 * (imageCount - 1);
+
+                const percentage = (mouseDelta / maxDelta) * -100,
+                    nextPercentageUnconstrained = parseFloat(track.dataset.prevPercentage) + percentage,
+                    nextPercentage = Math.max(Math.min(nextPercentageUnconstrained, 0), maxScrollPercentage);
+
+                track.dataset.percentage = nextPercentage;
+
+                track.animate({
+                    transform: `translate(${nextPercentage}%, -50%)`
+                }, { duration: 1200, fill: "forwards" });
+
+                for(const image of track.getElementsByClassName("image")) {
+                    image.animate({
+                        objectPosition: `${100 + nextPercentage}% center`
+                    }, { duration: 1200, fill: "forwards" });
+                }
+            }
+
+
+            window.onmousedown = e => handleOnDown(e);
+            window.onmouseup = e => handleOnUp(e);
+            window.onmousemove = e => handleOnMove(e);
+
+            window.ontouchstart = e => handleOnDown(e.touches[0]);
+            window.ontouchend = e => handleOnUp(e.touches[0]);
+            window.ontouchmove = e => handleOnMove(e.touches[0]);
+
+            // Show a hint on how to interact with the page
+
+            const scrollHint = document.getElementById("scroll-hint");
+
+            const hideScrollHint = () => {
+                if (scrollHint) scrollHint.classList.add("hidden");
+            };
+
+            setTimeout(hideScrollHint, 4000);
+            ["mousedown", "touchstart"].forEach(event => 
+                window.addEventListener(event, hideScrollHint, { once: true })
+            );
+
+
+            // Show location on hover
+
+            track.dataset.hovering = 'false';
+
+            track.addEventListener("mouseenter", () => {
+                track.dataset.hovering = "true";
+            })
+
+            track.addEventListener("mouseleave", () => {
+                track.dataset.hovering = "false";
+            });
+
+            const wrappers = document.querySelectorAll('.image-wrapper');
+            const label = document.getElementById('location-label');
+
+            wrappers.forEach(wrapper => {
+                wrapper.addEventListener("mouseenter", () => {
+                    label.textContent = wrapper.dataset.location;
+                    wrapper.appendChild(label);
+                    label.classList.remove('hidden');
+                });
+
+                wrapper.addEventListener("mouseleave", () => {
+                    label.classList.add('hidden'); 
+                });
+            });
+        </script>
     </body>
 </html>
 
