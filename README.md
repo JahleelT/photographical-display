@@ -31,7 +31,7 @@ Inspired by this [Award Winning Animation With Only 20 Lines Of CSS?](https://ww
 - **[London]** - [Brief description or number of photos]
 - **[New York]** - [Brief description or number of photos]
 - **[Seattle]** - [Brief description or number of photos]
-- **[Cover Photos (on base page)]** - 
+- **[Cover Photos (on base page)]** - [Brief description or number of photos]
 
 ## Cool Effects & Tricks
 
@@ -41,7 +41,7 @@ Inspired by this [Award Winning Animation With Only 20 Lines Of CSS?](https://ww
 
 ## Live Demo
 
-(Insert link to vercel deployment)[]
+[Insert link to vercel deployment]()
 
 ## Running Locally
 
@@ -57,7 +57,7 @@ open homeshow.html
 # or use a local server
 ```
 
-## Next To-Do's
+## Next To-Dos
 -  Text that appears centered per photo upon hover
 -  Adding additional pages to show more images by category (of city/country)
 -  Image enlargement upon clicking images inside a categorical page

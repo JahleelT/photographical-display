@@ -2,28 +2,193 @@
 <html>
     <head> 
         <title>Home Page</title>
-        <link rel="stylesheet" href="photostyle.css">
-        <script src="animation.js" defer></script>
         <meta charset="UTF-8">
         <meta name="description" content="photography travel italy greece france uk united kingdom netherlands amsterdam london photos sildeshow">
         <meta name="author" content="Jahleel Townsend">
-        <meta http-equiv="refresh" content="30">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+
+            body {
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: #f0f0f0;
+
+            }
+
+
+            #image-track {
+                display: flex;
+                gap: 4vmin;
+                position: absolute;
+                left: 50%; 
+                top: 50%;
+                transform: translate(0%, -50%); 
+                user-select: none; /* -- Prevent image highlighting -- */
+            }
+
+            .image-wrapper {
+                position: relative;
+                width: 40vmin;
+                height: 56vmin;
+            }
+
+            .image-wrapper img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center;
+                transition: transform 0.3s ease;
+                cursor: pointer;
+            }
+
+            .location-label {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: rgba(0, 0, 0, 0.75);
+                color: white;
+                padding: 1vmin 2vmin;
+                border-radius: 2vmin;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                font-size: 2vmin;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                white-space: nowrap;
+            }
+
+            .image-wrapper:hover .location-label {
+                opacity: 1;
+            }
+
+            .image-wrapper:hover img {
+                transform: scale(1.05);
+            }
+
+
+            #image-track > .image {
+                width: 40vmin;
+                height: 56vmin;
+                min-width: 30vmin;
+                aspect-ratio: 2/3;
+                object-fit: cover;
+                object-position: 100% center;
+                transition: object-position 1.2s ease, transform 0.3s ease;
+                cursor: pointer;
+            }
+
+            #image-track > .image:hover {
+                transform: scale(1.05);
+            }
+
+            body.menu-toggled > .meta-link > span {
+                color: rgb(30, 30, 30);
+            }
+
+            #source-link {
+                bottom: 60px;
+            }
+
+            #source-link > i {
+                color: rgb(94, 106, 210);
+            }
+
+            #yt-link > i {
+                color: rgb(239, 83, 80);
+            }
+
+            .meta-link {
+                align-items: center;
+                backdrop-filter: blur(3px);
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 6px;
+                bottom: 10px;
+                box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+                cursor: pointer;  
+                display: inline-flex;
+                gap: 5px;
+                left: 10px;
+                padding: 10px 20px;
+                position: fixed;
+                text-decoration: none;
+                transition: background-color 400ms, border-color 400ms;
+                z-index: 10000;
+            }
+
+            .meta-link:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            #scroll-hint {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                font-size: 2rem;
+                background-color: rgba(0,0,0,0.4);
+                padding: 1rem 2rem;
+                border-radius: 12px;
+                opacity: 1;
+                transition: opacity 0.6s ease;
+                pointer-events: none;
+                z-index: 9999;
+            }
+
+            #scroll-hint.hidden {
+                opacity: 0;
+            }
+
+        </style>
     </head>
 
     <body>
         <div id="scroll-hint">⬅️ Drag to Scroll ➡️</div>
-        
+
+        <div id="location-label" class="hidden"></div>
+
         <div id="image-track" data-mouse-down-at="0" data-prev-percentage="0">
-            <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829816/nycCover_ea64pc.jpg" draggable="false" /> <!-- New York Cover Photo -->
-            <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829813/italyCover_itiqgb.jpg" draggable="false" /> <!-- Italy Cover Photo -->
-            <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829807/greeceCover_yphpzs.jpg" draggable="false" /> <!-- Greece Cover Photo -->
-            <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829797/amsterdamCover_q3fvju.jpg" draggable="false" /> <!-- Amsterdam/Netherlands/Holland Cover Photo-->
-            <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829813/londonCover_kgkjrm.jpg" draggable="false" /> <!-- London/UK Cover Photo -->
-            <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829807/franceCover_wzuy4g.jpg" draggable="false" /> <!-- France/Paris/Versailles Cover Photo -->
-            <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829804/belgiumCover_uv89o0.jpg" draggable="false" /> <!-- Belgium/Bruges/Brussels Cover Photo -->
-            <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829816/seattleCover_olu4vz.jpg" draggable="false" /> <!-- Seattle/Washington/Vancouver(?) Cover Photo -->
+
+            <div class="image-wrapper" data-location="New York">
+                <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829816/nycCover_ea64pc.jpg" draggable="false" /> <!-- New York Cover Photo -->
+            </div>
+
+            <div class="image-wrapper" data-location="Italy">
+                <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829813/italyCover_itiqgb.jpg" draggable="false" data-location="Italy"/> <!-- Italy Cover Photo -->
+            </div>
+            
+            <div class="image-wrapper" data-location="Greece">
+                <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829807/greeceCover_yphpzs.jpg" draggable="false" data-location="Greece" /> <!-- Greece Cover Photo -->
+            </div>
+            
+            <div class="image-wrapper" data-location="Amsterdam">
+                <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829797/amsterdamCover_q3fvju.jpg" draggable="false" data-location="Amsterdam" /> <!-- Amsterdam/Netherlands/Holland Cover Photo-->
+            </div>
+            
+            <div class="image-wrapper" data-location="London">
+                <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829813/londonCover_kgkjrm.jpg" draggable="false" data-location="London"/> <!-- London/UK Cover Photo -->
+            </div>
+            
+            <div class="image-wrapper" data-location="France">
+                <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829807/franceCover_wzuy4g.jpg" draggable="false" data-location="France"/> <!-- France/Paris/Versailles Cover Photo -->
+            </div>
+            
+            <div class="image-wrapper" data-location="Belgium">
+                <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829804/belgiumCover_uv89o0.jpg" draggable="false" data-location="Belgium"/> <!-- Belgium/Bruges/Brussels Cover Photo -->
+            </div>
+            
+            <div class="image-wrapper" data-location="Seattle">
+                <img class="image" src="https://res.cloudinary.com/dwvnaog1p/image/upload/v1750829816/seattleCover_olu4vz.jpg" draggable="false" data-location="Seattle"/> <!-- Seattle/Washington/Vancouver(?) Cover Photo -->
+            </div>
+            
         </div>
+
+        <script src="animation.js" defer></script>
     </body>
 </html>
 
