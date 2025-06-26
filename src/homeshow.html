@@ -14,7 +14,6 @@
                 padding: 0;
                 overflow: hidden;
                 background-color: black;
-
             }
 
 
@@ -86,32 +85,47 @@
                 transform: scale(1.05);
             }
 
-            #scroll-hint {
+            #scroll-bar-container {
                 position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                color: white;
-                font-size: 2rem;
-                background-color: rgba(0, 0, 0, 0.4);
-                padding: 1rem 2rem;
-                border-radius: 12px;
+                bottom: 4vh;
+                left: 10vw;
+                width: 80vw;
+                height: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 5px;
+                visibility: visible;
+                overflow: hidden;
                 opacity: 1;
-                transition: opacity 0.6s ease;
-                pointer-events: none;
-                z-index: 9999;
+                transform: opacity 1s linear;
+                z-index: 1000;
+                pointer-events: auto;
             }
 
-            #scroll-hint.hidden {
+            #scroll-bar-container.hidden {
                 opacity: 0;
+                transition: opacity 1s linear;
+                pointer-events: none;
+            }
+
+            #scroll-bar-thumb {
+                width: 20%;
+                height: 100%;
+                background: rgba(140, 140, 140, 0.557);
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background 0.2s ease;
+                position: absolute;
+                left: 0%;
+            }
+
+            #scroll-bar-thumb:hover {
+                background-color: rgba(255, 255, 255, 0.8);
             }
 
         </style>
     </head>
 
     <body>
-        <div id="scroll-hint">⬅️ Drag to Scroll ➡️</div>
-
         <div id="location-label" class="hidden"></div>
 
         <div id="image-track" data-mouse-down-at="0" data-prev-percentage="0">
@@ -158,10 +172,24 @@
             
         </div>
 
+        <div id="scroll-bar-container">
+            <div id="scroll-bar-thumb"></div>
+        </div>
+
         <script>
+
             const track = document.getElementById("image-track");
 
             if (!track.dataset.percentage) track.dataset.percentage = "0";
+
+            function updateThumbPosition(percent = null) {
+                const imageCount = track.getElementsByClassName("image").length;
+                const viewportImages = window.innerWidth / (52 * window.innerHeight / 100);
+                const max = -100 * (imageCount - viewportImages);
+                const current = parseFloat(track.dataset.percentage);
+                const normalized = percent !== null ? percent : (current / max);
+                scrollBarThumb.style.left = `${normalized * 100}%`;
+            }
 
             // handling events 
 
@@ -172,7 +200,7 @@
             const handleOnUp = () => {
                 track.dataset.mouseDownAt = "0";  
                 track.dataset.prevPercentage = track.dataset.percentage;
-            }
+            };
 
             const handleOnMove = e => {
                 if(track.dataset.mouseDownAt === "0") return;
@@ -181,7 +209,8 @@
                     maxDelta = window.innerWidth / 2;
 
                 const imageCount = track.getElementsByClassName("image").length;
-                const maxScrollPercentage = -100 * (imageCount - 1);
+                const viewportImages = window.innerWidth / (52 * window.innerHeight / 100)
+                const maxScrollPercentage = -100 * (imageCount - viewportImages);
 
                 const percentage = (mouseDelta / maxDelta) * -100,
                     nextPercentageUnconstrained = parseFloat(track.dataset.prevPercentage) + percentage,
@@ -198,7 +227,9 @@
                         objectPosition: `${100 + nextPercentage}% center`
                     }, { duration: 1200, fill: "forwards" });
                 }
-            }
+
+                updateThumbPosition();
+            };
 
 
             window.onmousedown = e => handleOnDown(e);
@@ -209,18 +240,77 @@
             window.ontouchend = e => handleOnUp(e.touches[0]);
             window.ontouchmove = e => handleOnMove(e.touches[0]);
 
-            // Show a hint on how to interact with the page
 
-            const scrollHint = document.getElementById("scroll-hint");
 
-            const hideScrollHint = () => {
-                if (scrollHint) scrollHint.classList.add("hidden");
-            };
 
-            setTimeout(hideScrollHint, 4000);
-            ["mousedown", "touchstart"].forEach(event => 
-                window.addEventListener(event, hideScrollHint, { once: true })
-            );
+
+            const scrollBarContainer = document.getElementById("scroll-bar-container");
+            const scrollBarThumb = document.getElementById("scroll-bar-thumb");
+
+            setTimeout(() => scrollBarContainer.classList.add("hidden"), 4000);
+
+            let isDraggingThumb = false;
+
+            scrollBarThumb.addEventListener("mousedown", e => {
+                isDraggingThumb = true;
+                e.preventDefault();
+            });
+
+            window.addEventListener("mousemove", e => {
+                if (!isDraggingThumb) return;
+
+                const barRect = scrollBarContainer.getBoundingClientRect();
+                const percent = Math.min(Math.max(0, (e.clientX - barRect.left) / barRect.width), 1);
+
+                const sensitivity = 0.5;
+                const currentPercent = parseFloat(track.dataset.percentage || 0) / (-100 * (track.getElementsByClassName("image").length - viewportImages));
+                const adjustedPercent = currentPercent + (percent - currentPercent) * sensitivity
+
+                const imageCount = track.getElementsByClassName("image").length;
+                const viewportImages = innerWidth / ( 52 * innerHeight / 100)
+                const maxScroll = -100 * (imageCount - viewportImages);
+
+                const nextPercentage = maxScroll * adjustedPercent ;
+
+                track.dataset.percentage = nextPercentage;
+                track.dataset.prevPercentage = nextPercentage;
+
+                track.style.transform = `translate(${nextPercentage}%, -50%)`;
+
+                for (const image of track.getElementsByClassName("image")) {
+                    image.style.objectPosition = `${100 + nextPercentage}% center`;
+                }
+
+                updateThumbPosition(adjustedPercent);
+            });
+
+            window.addEventListener("mouseup", () => {
+                isDraggingThumb = false;
+            })
+
+            updateThumbPosition();
+
+            const scrollBarHoverArea = document.createElement('div');
+            scrollBarHoverArea.style.cssText = `
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 10vh;
+                pointer-events: auto;
+                z-index: 999;
+            `;
+
+            document.body.appendChild(scrollBarHoverArea);
+
+            scrollBarHoverArea.addEventListener("mouseenter", () => {
+                scrollBarContainer.classList.remove("hidden");
+            });
+
+            scrollBarHoverArea.addEventListener("mouseleave", () => {
+                scrollBarContainer.classList.add("hidden");
+            });
+
         </script>
     </body>
 </html>
